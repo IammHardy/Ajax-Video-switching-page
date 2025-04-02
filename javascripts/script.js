@@ -1,49 +1,43 @@
-// let number = 0; //--1
-// const titleArea = document.getElementById("title"); //--2
-// const contentArea = document.getElementById("content"); //--2
-// const videoArea = document.getElementById("video"); //--2
-// const button = document.getElementById('btn'); //--3
-
-
-// function getData() {
-//     const request = new XMLHttpRequest();
-//     request.onreadystatechange = function() {
-//       if (request.readyState == 4) {
-//         if(request.status == 200) {
-//             const data = JSON.parse(request.responseText);
-//             document.getElementById("title").innerHTML = data[0].title;
-//         }
-//       }
-//     }
-//     request.open("GET", "ajax.json");
-//     request.send();
-//   }
-  
-//   window.onload = getData;
-
-let number = 0; //--1
-const titleArea = document.getElementById("title"); //--2
-const contentArea = document.getElementById("content"); //--2
-const videoArea = document.getElementById("video"); //--2
-const button = document.getElementById('btn'); //--3
+let number = 0;
+let data = []; // Store data retrieved from ajax.json
+const button = document.getElementById('btn');
+const titleArea = document.getElementById("title");
+const contentArea = document.getElementById("content");
+const videoArea = document.getElementById("video");
 
 function getData() {
-  button.addEventListener('click', e => { //--4
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function() {
-      if (request.readyState == 4) {
-        if(request.status == 200) {
-          titleArea.innerHTML = request.response[number].title; //--5
-          contentArea.innerHTML = request.response[number].content; //--5
-          videoArea.setAttribute("src", request.response[number].url); //--6
-          number == 2 ? number = 0 : number++; //--7
-        }
-      }
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function() {
+    if (request.readyState === 4 && request.status === 200) {
+      data = JSON.parse(request.responseText); // Store data once
+      updateVideo(); // Display the first video immediately
     }
-    request.open("GET", "ajax.json");
-    request.responseType = "json";
-    request.send(null);
-  })
+  };
+  request.open("GET", "ajax.json");
+  request.send();
 }
 
+function updateVideo() {
+  if (data.length > 0) {
+    titleArea.innerHTML = data[number].title;
+    contentArea.innerHTML = data[number].content;
+    videoArea.setAttribute("src", data[number].url);
+    
+    // Cycle through videos
+    number = (number + 1) % data.length;
+  }
+}
+
+function changeVideo() {
+  if (data.length === 0) {
+    getData(); // Fetch data only if it hasn't been loaded
+  } else {
+    updateVideo();
+  }
+}
+
+// Attach event listener to button
+button.addEventListener('click', changeVideo);
+
+// Load data on page load
 window.onload = getData;
